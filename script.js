@@ -446,12 +446,14 @@ function renderCart() {
 function openCart() {
   cartDrawer.classList.add("open");
   cartDrawer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("cart-open");
   overlay.hidden = false;
 }
 
 function closeCart() {
   cartDrawer.classList.remove("open");
   cartDrawer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("cart-open");
   overlay.hidden = true;
 }
 
