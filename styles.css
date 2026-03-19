@@ -919,8 +919,8 @@ main {
   }
 
   .floating-cart {
-    width: calc(100vw - 1rem);
-    max-width: 460px;
+    width: calc(100vw - 1.2rem);
+    max-width: 320px;
     padding: 0.62rem 0.68rem 0.62rem 1rem;
     gap: 0.78rem;
   }
@@ -995,8 +995,8 @@ main {
   }
 
   .floating-cart {
-    width: calc(100vw - 0.9rem);
-    max-width: 430px;
+    width: calc(100vw - 1rem);
+    max-width: 320px;
     padding: 0.56rem 0.56rem 0.56rem 0.84rem;
     gap: 0.64rem;
   }
