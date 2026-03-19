@@ -43,27 +43,66 @@ function parseStock(raw) {
   return Number.isFinite(value) ? value : 0;
 }
 
-function mapRowToProduct(row, index) {
-  const name = String(valueFromAliases(row, ["name", "title", "model", "car", "itemname"])).trim();
-  const brand = String(valueFromAliases(row, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
-  const category = String(valueFromAliases(row, ["category", "series", "type", "line"])).trim() || "Mainline";
-  const condition = String(valueFromAliases(row, ["condition", "cardcondition"])).trim() || "Carded Good";
-  const image = String(valueFromAliases(row, ["image", "imageurl", "pic", "photo", "url"])).trim() || PLACEHOLDER_IMAGE;
-  const idRaw = valueFromAliases(row, ["id", "sku", "productid"]);
-  const priceRaw = valueFromAliases(row, ["price", "sellingprice", "mrp", "amount"]);
-  const stockRaw = valueFromAliases(row, ["stock", "quantity", "qty", "available"]);
+function parseDiscount(raw, mrp, salePrice) {
+  const cleaned = String(raw || "").replace(/[^0-9.]/g, "");
+  const direct = Number(cleaned);
+  if (Number.isFinite(direct) && direct > 0) return Math.round(direct);
+  if (mrp > salePrice && salePrice > 0) {
+    return Math.round(((mrp - salePrice) / mrp) * 100);
+  }
+  return 0;
+}
+
+function normalizeProduct(raw, index) {
+  const name = String(valueFromAliases(raw, ["name", "title", "model", "car", "itemname", "productname"])).trim();
+  const brand = String(valueFromAliases(raw, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
+  const category = String(valueFromAliases(raw, ["category", "series", "type", "line"])).trim() || "Mainline";
+  const condition = String(valueFromAliases(raw, ["condition", "cardcondition"])).trim() || "Carded Good";
+  const image1 = String(valueFromAliases(raw, ["image", "imageurl", "pic", "photo", "url"])).trim();
+  const image2 = String(valueFromAliases(raw, ["image2", "pic2", "photo2"])).trim();
+  const image3 = String(valueFromAliases(raw, ["image3", "pic3", "photo3"])).trim();
+  const idRaw = valueFromAliases(raw, ["id", "sku", "productid"]);
+  const priceRaw = valueFromAliases(raw, ["price", "sellingprice", "saleprice", "amount"]);
+  const mrpRaw = valueFromAliases(raw, ["mrp", "originalprice", "listprice"]);
+  const stockRaw = valueFromAliases(raw, ["stock", "quantity", "qty", "available"]);
+  const discountRaw = valueFromAliases(raw, ["discount", "discountpercent", "off"]);
+  const sku = String(valueFromAliases(raw, ["sku", "itemcode", "code", "productcode"])).trim();
+  const scale = String(valueFromAliases(raw, ["scale", "size"])).trim();
+  const year = String(valueFromAliases(raw, ["year", "modelyear"])).trim();
+  const color = String(valueFromAliases(raw, ["color", "colour"])).trim();
+  const series = String(valueFromAliases(raw, ["series", "set", "collection"])).trim();
+  const material = String(valueFromAliases(raw, ["material"])).trim();
+  const description = String(valueFromAliases(raw, ["description", "details", "about", "notes"])).trim();
+
   const id = Number.parseInt(String(idRaw), 10);
+  const salePrice = parsePrice(priceRaw);
+  const mrpPrice = parsePrice(mrpRaw);
+  const finalPrice = salePrice > 0 ? salePrice : mrpPrice;
 
   return {
     id: Number.isFinite(id) ? id : index + 1,
     name,
     brand,
     category,
-    price: parsePrice(priceRaw),
+    price: finalPrice,
+    mrp: mrpPrice,
+    discountPercent: parseDiscount(discountRaw, mrpPrice, finalPrice),
     condition,
     stock: parseStock(stockRaw),
-    image
+    image: image1 || PLACEHOLDER_IMAGE,
+    images: [image1, image2, image3].filter(Boolean),
+    sku,
+    scale,
+    year,
+    color,
+    series,
+    material,
+    description
   };
+}
+
+function mapRowToProduct(row, index) {
+  return normalizeProduct(row, index);
 }
 
 function formatPrice(value) {
@@ -113,17 +152,44 @@ function addToCart(product) {
 function renderProduct(product) {
   const buttonDisabled = product.stock <= 0 ? "disabled" : "";
   const stockText = product.stock <= 0 ? "Sold Out" : `In stock: ${product.stock}`;
+  const galleryImages = product.images && product.images.length ? product.images : [product.image || PLACEHOLDER_IMAGE];
+  const specItems = [
+    product.sku ? `SKU: ${product.sku}` : "",
+    product.brand ? `Brand: ${product.brand}` : "",
+    product.series ? `Series: ${product.series}` : "",
+    product.scale ? `Scale: ${product.scale}` : "",
+    product.year ? `Year: ${product.year}` : "",
+    product.color ? `Color: ${product.color}` : "",
+    product.material ? `Material: ${product.material}` : "",
+    product.condition ? `Condition: ${product.condition}` : ""
+  ].filter(Boolean);
+  const showMrp = Number(product.mrp) > Number(product.price);
+  const showDiscount = Number(product.discountPercent) > 0;
   productDetail.innerHTML = `
     <article class="detail-card">
       <div class="detail-image-wrap">
-        <img src="${product.image || PLACEHOLDER_IMAGE}" alt="${product.name}">
+        <img id="detailMainImage" src="${galleryImages[0]}" alt="${product.name}">
+        ${galleryImages.length > 1 ? `
+          <div class="detail-thumbs">
+            ${galleryImages.map((image, idx) => `
+              <button class="thumb-btn ${idx === 0 ? "active" : ""}" data-image="${image}" aria-label="View image ${idx + 1}">
+                <img src="${image}" alt="${product.name} ${idx + 1}">
+              </button>
+            `).join("")}
+          </div>
+        ` : ""}
       </div>
       <div class="detail-info">
         <p class="eyebrow">${product.category}</p>
         <h1>${product.name}</h1>
-        <p class="meta">${product.brand} | ${product.condition}</p>
         <p class="detail-stock">${stockText}</p>
-        <p class="detail-price">${formatPrice(product.price)}</p>
+        <div class="detail-price-row">
+          <p class="detail-price">${formatPrice(product.price)}</p>
+          ${showMrp ? `<p class="old-price detail-old">${formatPrice(product.mrp)}</p>` : ""}
+          ${showDiscount ? `<span class="discount-pill">${product.discountPercent}% OFF</span>` : ""}
+        </div>
+        ${product.description ? `<p class="meta desc">${product.description}</p>` : ""}
+        ${specItems.length ? `<ul class="detail-specs">${specItems.map((line) => `<li>${line}</li>`).join("")}</ul>` : ""}
         <div class="hero-actions">
           <button id="detailAddBtn" class="btn-primary" ${buttonDisabled}>Add to Cart</button>
           <a class="btn-secondary" href="index.html#hotwheels">Continue Shopping</a>
@@ -136,6 +202,16 @@ function renderProduct(product) {
   if (addBtn) {
     addBtn.addEventListener("click", () => addToCart(product));
   }
+
+  const mainImage = document.getElementById("detailMainImage");
+  const thumbButtons = Array.from(document.querySelectorAll(".thumb-btn"));
+  thumbButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      mainImage.src = button.dataset.image;
+      thumbButtons.forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+    });
+  });
 }
 
 function renderRelated(products, currentProduct) {
@@ -152,7 +228,8 @@ function renderRelated(products, currentProduct) {
     .map((item) => `
       <a href="product.html?id=${item.id}" class="tile product-link">
         <h4>${item.name}</h4>
-        <p>${item.category} | ${formatPrice(item.price)}</p>
+        <p>${item.brand} | ${item.category}</p>
+        <p>${formatPrice(item.price)}</p>
       </a>
     `)
     .join("");
@@ -182,13 +259,9 @@ async function loadProducts() {
     if (!response.ok) throw new Error("Cannot load products");
     const data = await response.json();
     if (!Array.isArray(data) || !data.length) throw new Error("Invalid products data");
-    return data.map((item, index) => ({
-      ...item,
-      id: Number.isFinite(Number(item.id)) ? Number(item.id) : index + 1,
-      image: item.image || PLACEHOLDER_IMAGE
-    }));
+    return data.map((item, index) => normalizeProduct(item, index));
   } catch {
-    return fallbackProducts;
+    return fallbackProducts.map((item, index) => normalizeProduct(item, index));
   }
 }
 

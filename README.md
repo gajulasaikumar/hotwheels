@@ -15,20 +15,21 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
 ## Customize for your store
 
 1. Update your WhatsApp number in `script.js`:
-   - `const STORE_WHATSAPP_NUMBER = "919999999999";`
+   - `const STORE_WHATSAPP_NUMBER = "917013266345";`
 2. Set your shipping rules in `script.js`:
    - `SHIPPING_FLAT_FEE`
    - `FREE_SHIPPING_THRESHOLD`
 3. Upload `inventory.xlsx` in the project root to auto-load products from Excel.
-4. Supported Excel column names (any one from each group works):
-   - Name: `name` / `title` / `model` / `car`
-   - Brand: `brand` / `make`
-   - Category: `category` / `series` / `type`
-   - Price: `price` / `sellingprice` / `mrp`
-   - Stock: `quantity` / `qty` / `stock`
-   - Image URL: `image` / `pic` / `photo` / `imageurl`
-5. If `inventory.xlsx` is not present, the app falls back to `products.json`.
-6. Update store name and text in `index.html` for your brand.
+4. Use the included sample file: `inventory-template.xlsx` and replace rows with your own items, then rename it to `inventory.xlsx`.
+5. Supported Excel columns (aliases supported):
+   - Required minimum: `name`, `brand`, `category`, `price` (or `mrp`), `quantity` (or `stock`)
+   - Pricing: `price`, `sellingprice`, `saleprice`, `mrp`, `discount`
+   - Inventory: `quantity`, `qty`, `stock`, `available`
+   - Identity: `id`, `sku`, `itemcode`, `productcode`
+   - Product details: `series`, `scale`, `year`, `color`, `material`, `condition`, `description`, `isNew`
+   - Images: `image`, `image2`, `image3` (or `pic`/`photo` variants)
+6. If `inventory.xlsx` is not present, the app falls back to `products.json`.
+7. Update store name and text in `index.html` for your brand.
 
 ## Built-in shopping behavior
 

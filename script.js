@@ -91,33 +91,96 @@ function parseBool(raw) {
   return ["true", "yes", "y", "1", "new", "latest"].includes(text);
 }
 
-function mapRowToProduct(row, index) {
-  const name = String(valueFromAliases(row, ["name", "title", "model", "car", "itemname"])).trim();
-  const brand = String(valueFromAliases(row, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
-  const category = String(valueFromAliases(row, ["category", "series", "type", "line"])).trim() || "Mainline";
-  const condition = String(valueFromAliases(row, ["condition", "cardcondition"])).trim() || "Carded Good";
-  const image = String(valueFromAliases(row, ["image", "imageurl", "pic", "photo", "url"])).trim() || PLACEHOLDER_IMAGE;
-  const idRaw = valueFromAliases(row, ["id", "sku", "productid"]);
-  const priceRaw = valueFromAliases(row, ["price", "sellingprice", "mrp", "amount"]);
-  const stockRaw = valueFromAliases(row, ["stock", "quantity", "qty", "available"]);
-  const isNewRaw = valueFromAliases(row, ["isnew", "new", "latest"]);
+function parseDiscount(raw, mrp, salePrice) {
+  const cleaned = String(raw || "").replace(/[^0-9.]/g, "");
+  const direct = Number(cleaned);
+  if (Number.isFinite(direct) && direct > 0) return Math.round(direct);
+  if (mrp > salePrice && salePrice > 0) {
+    return Math.round(((mrp - salePrice) / mrp) * 100);
+  }
+  return 0;
+}
+
+function normalizeProduct(raw, index) {
+  const name = String(valueFromAliases(raw, ["name", "title", "model", "car", "itemname", "productname"])).trim();
+  const brand = String(valueFromAliases(raw, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
+  const category = String(valueFromAliases(raw, ["category", "series", "type", "line"])).trim() || "Mainline";
+  const condition = String(valueFromAliases(raw, ["condition", "cardcondition"])).trim() || "Carded Good";
+  const image1 = String(valueFromAliases(raw, ["image", "imageurl", "pic", "photo", "url"])).trim();
+  const image2 = String(valueFromAliases(raw, ["image2", "pic2", "photo2"])).trim();
+  const image3 = String(valueFromAliases(raw, ["image3", "pic3", "photo3"])).trim();
+  const idRaw = valueFromAliases(raw, ["id", "sku", "productid"]);
+  const priceRaw = valueFromAliases(raw, ["price", "sellingprice", "saleprice", "amount"]);
+  const mrpRaw = valueFromAliases(raw, ["mrp", "originalprice", "listprice"]);
+  const stockRaw = valueFromAliases(raw, ["stock", "quantity", "qty", "available"]);
+  const isNewRaw = valueFromAliases(raw, ["isnew", "new", "latest"]);
+  const discountRaw = valueFromAliases(raw, ["discount", "discountpercent", "off"]);
+  const sku = String(valueFromAliases(raw, ["sku", "itemcode", "code", "productcode"])).trim();
+  const scale = String(valueFromAliases(raw, ["scale", "size"])).trim();
+  const year = String(valueFromAliases(raw, ["year", "modelyear"])).trim();
+  const color = String(valueFromAliases(raw, ["color", "colour"])).trim();
+  const series = String(valueFromAliases(raw, ["series", "set", "collection"])).trim();
+  const material = String(valueFromAliases(raw, ["material"])).trim();
+  const description = String(valueFromAliases(raw, ["description", "details", "about", "notes"])).trim();
 
   const id = Number.parseInt(String(idRaw), 10);
+  const salePrice = parsePrice(priceRaw);
+  const mrpPrice = parsePrice(mrpRaw);
+  const finalPrice = salePrice > 0 ? salePrice : mrpPrice;
+
   return {
     id: Number.isFinite(id) ? id : index + 1,
     name,
     brand,
     category,
-    price: parsePrice(priceRaw),
+    price: finalPrice,
+    mrp: mrpPrice,
+    discountPercent: parseDiscount(discountRaw, mrpPrice, finalPrice),
     condition,
     stock: parseStock(stockRaw),
     isNew: parseBool(isNewRaw),
-    image
+    image: image1 || PLACEHOLDER_IMAGE,
+    images: [image1, image2, image3].filter(Boolean),
+    sku,
+    scale,
+    year,
+    color,
+    series,
+    material,
+    description
   };
+}
+
+function mapRowToProduct(row, index) {
+  return normalizeProduct(row, index);
 }
 
 function formatPrice(value) {
   return `Rs ${value.toLocaleString("en-IN")}`;
+}
+
+function productMetaLine(item) {
+  return [item.brand, item.series, item.scale, item.year].filter(Boolean).join(" | ");
+}
+
+function productSpecsLine(item) {
+  const specs = [];
+  if (item.sku) specs.push(`SKU: ${item.sku}`);
+  if (item.color) specs.push(`Color: ${item.color}`);
+  if (item.material) specs.push(`Material: ${item.material}`);
+  return specs.join(" | ");
+}
+
+function renderPriceBlock(item) {
+  const showMrp = Number(item.mrp) > Number(item.price);
+  const showDiscount = Number(item.discountPercent) > 0;
+  return `
+    <div class="price-row">
+      <span class="price">${formatPrice(item.price)}</span>
+      ${showMrp ? `<span class="old-price">${formatPrice(item.mrp)}</span>` : ""}
+      ${showDiscount ? `<span class="discount-pill">${item.discountPercent}% OFF</span>` : ""}
+    </div>
+  `;
 }
 
 function setActiveChip(category) {
@@ -191,6 +254,7 @@ function renderProducts() {
     const disabled = item.stock <= 0 ? "disabled" : "";
     const buttonLabel = item.stock <= 0 ? "Sold Out" : "Add to Cart";
     const warnClass = item.stock <= 2 ? "warn" : "";
+    const specsLine = productSpecsLine(item);
     return `
       <article class="product-card">
         <a class="product-link" href="product.html?id=${item.id}">
@@ -199,9 +263,12 @@ function renderProducts() {
         <div class="product-body">
           <p class="stock ${warnClass}">${item.category} | ${stockText(item.stock)}</p>
           <h3><a class="product-link" href="product.html?id=${item.id}">${item.name}</a></h3>
-          <p class="meta">${item.brand} | ${item.condition}</p>
+          <p class="meta">${productMetaLine(item) || item.brand}</p>
+          ${specsLine ? `<p class="meta small">${specsLine}</p>` : ""}
+          ${item.description ? `<p class="meta desc">${item.description}</p>` : ""}
+          <p class="meta">${item.condition}</p>
           <div class="product-foot">
-            <span class="price">${formatPrice(item.price)}</span>
+            ${renderPriceBlock(item)}
             <button class="btn-add" data-id="${item.id}" ${disabled}>${buttonLabel}</button>
           </div>
         </div>
@@ -221,7 +288,8 @@ function renderNewArrivals() {
   newArrivalGrid.innerHTML = arrivals.map((item) => `
     <article class="tile">
       <h4>${item.name}</h4>
-      <p>${item.category} | ${formatPrice(item.price)}</p>
+      <p>${item.brand} | ${item.category}</p>
+      <p>${formatPrice(item.price)}</p>
     </article>
   `).join("");
 }
@@ -315,7 +383,7 @@ function renderCart() {
 
   cartItems.innerHTML = summary.map((item) => `
     <article class="cart-item">
-      <h4>${item.name}</h4>
+      <h4>${item.name}${item.sku ? ` (${item.sku})` : ""}</h4>
       <p>${item.qty} x ${formatPrice(item.price)} = ${formatPrice(item.lineTotal)}</p>
       <button data-remove-id="${item.id}">Remove</button>
     </article>
@@ -368,7 +436,10 @@ function checkoutOnWhatsApp() {
   const subtotal = summary.reduce((sum, item) => sum + item.lineTotal, 0);
   const shipping = subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD ? SHIPPING_FLAT_FEE : 0;
   const total = subtotal + shipping;
-  const lines = summary.map((item) => `- ${item.name} | Qty: ${item.qty} | ${formatPrice(item.lineTotal)}`);
+  const lines = summary.map((item) => {
+    const sku = item.sku ? ` | SKU: ${item.sku}` : "";
+    return `- ${item.name}${sku} | Qty: ${item.qty} | ${formatPrice(item.lineTotal)}`;
+  });
   const message =
     `Hi, I want to order these Hot Wheels:%0A%0A${lines.join("%0A")}` +
     `%0A%0ASubtotal: ${formatPrice(subtotal)}` +
@@ -502,13 +573,9 @@ async function loadProducts() {
     if (!response.ok) throw new Error("Failed to load products.json");
     const data = await response.json();
     if (!Array.isArray(data) || !data.length) throw new Error("Invalid products data");
-    products = data.map((item, index) => ({
-      ...item,
-      id: Number.isFinite(Number(item.id)) ? Number(item.id) : index + 1,
-      image: item.image || PLACEHOLDER_IMAGE
-    }));
+    products = data.map((item, index) => normalizeProduct(item, index));
   } catch (error) {
-    products = fallbackProducts;
+    products = fallbackProducts.map((item, index) => normalizeProduct(item, index));
   }
 }
 
