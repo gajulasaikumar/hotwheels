@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hot Wheels Garage | Buy Hot Wheels Online</title>
+  <meta name="description" content="User-friendly Hot Wheels store with easy category navigation and WhatsApp checkout.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <p>Trusted Hot Wheels Seller | Secure Packing | PAN India Shipping</p>
+  </div>
+
+  <header class="header">
+    <a href="#home" class="logo">
+      <span>HOT WHEELS</span>
+      <strong>GARAGE</strong>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#home">Home</a>
+      <a href="#hotwheels">Hot Wheels</a>
+      <a href="#new-arrivals">New Arrivals</a>
+      <a href="#brands">Brands</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="cart-btn" id="openCartBtn" aria-label="Open cart">
+      Cart <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <nav class="category-nav" aria-label="Category navigation">
+    <button class="chip active" data-chip="all">All</button>
+    <button class="chip" data-chip="Mainline">Mainline</button>
+    <button class="chip" data-chip="Premium">Premium</button>
+    <button class="chip" data-chip="Treasure Hunt">Treasure Hunt</button>
+    <button class="chip" data-chip="Team Transport">Team Transport</button>
+    <button class="chip" data-chip="Boulevard">Boulevard</button>
+  </nav>
+
+  <main>
+    <section id="home" class="hero">
+      <div>
+        <p class="eyebrow">Simple Shopping Experience</p>
+        <h1>Best Hot Wheels Store For Collectors</h1>
+        <p>Browse by category, add to cart, and place your order on WhatsApp in one step.</p>
+        <div class="hero-actions">
+          <a href="#hotwheels" class="btn-primary">Shop Hot Wheels</a>
+          <a href="#new-arrivals" class="btn-secondary">See New Arrivals</a>
+        </div>
+      </div>
+      <div class="hero-box">
+        <h3>How To Order</h3>
+        <p>1. Choose cars</p>
+        <p>2. Check cart total</p>
+        <p>3. Tap order on WhatsApp</p>
+      </div>
+    </section>
+
+    <section id="hotwheels" class="section">
+      <div class="section-head">
+        <h2>Hot Wheels Collection</h2>
+        <p>1000+ Hot Wheels models with simple filters and fast ordering.</p>
+      </div>
+      <div class="controls">
+        <input id="searchInput" class="search-wide" type="search" placeholder="Search by name (example: Skyline)">
+        <select id="categoryFilter">
+          <option value="all">All Categories</option>
+        </select>
+        <select id="brandFilter">
+          <option value="all">All Brands</option>
+        </select>
+        <select id="availabilityFilter">
+          <option value="all">All Availability</option>
+          <option value="in-stock">In Stock</option>
+          <option value="sold-out">Sold Out</option>
+        </select>
+        <select id="sortSelect">
+          <option value="featured">Sort: Featured</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="name-az">Name: A-Z</option>
+          <option value="name-za">Name: Z-A</option>
+        </select>
+        <input id="priceFromInput" type="number" min="0" placeholder="Price from">
+        <input id="priceToInput" type="number" min="0" placeholder="Price to">
+        <button id="clearFiltersBtn" class="btn-secondary" type="button">Clear Filters</button>
+      </div>
+      <p id="resultsInfo" class="results-info"></p>
+      <div id="productGrid" class="product-grid"></div>
+      <div class="load-wrap">
+        <button id="loadMoreBtn" class="btn-secondary">Load More</button>
+      </div>
+    </section>
+
+    <section id="new-arrivals" class="section">
+      <div class="section-head">
+        <h2>New Arrivals</h2>
+        <p>Latest pieces added to your storefront.</p>
+      </div>
+      <div id="newArrivalGrid" class="mini-grid"></div>
+    </section>
+
+    <section id="brands" class="section">
+      <div class="section-head">
+        <h2>Shop By Brand</h2>
+      </div>
+      <div id="brandGrid" class="brand-grid"></div>
+    </section>
+
+    <section id="faq" class="section faq">
+      <div class="section-head">
+        <h2>FAQ</h2>
+      </div>
+      <details>
+        <summary>How do I place an order?</summary>
+        <p>Add products to cart and click "Order on WhatsApp".</p>
+      </details>
+      <details>
+        <summary>Do you ship across India?</summary>
+        <p>Yes, PAN India shipping is supported.</p>
+      </details>
+      <details>
+        <summary>Can I check card condition before buying?</summary>
+        <p>Yes, every listing shows condition notes.</p>
+      </details>
+    </section>
+
+    <section id="contact" class="section contact">
+      <h2>Need Help Choosing Cars?</h2>
+      <p>Message us directly on WhatsApp for bundle deals and rare requests.</p>
+      <button id="contactWhatsAppBtn" class="btn-primary">Chat on WhatsApp</button>
+    </section>
+  </main>
+
+  <aside class="cart" id="cartDrawer" aria-hidden="true">
+    <div class="cart-head">
+      <h2>Your Cart</h2>
+      <button id="closeCartBtn" aria-label="Close cart">Close</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-foot">
+      <p>Subtotal: <strong id="cartSubtotal">Rs 0</strong></p>
+      <p>Shipping: <strong id="shippingFee">Rs 0</strong></p>
+      <p>Total: <strong id="cartTotal">Rs 0</strong></p>
+      <button id="checkoutBtn" class="btn-primary full">Order on WhatsApp</button>
+    </div>
+  </aside>
+
+  <div class="toast" id="cartToast" role="status" aria-live="polite" hidden>
+    <p id="toastText">Item added to cart</p>
+    <div class="toast-actions">
+      <button id="toastViewCartBtn" class="btn-primary">View Cart</button>
+      <button id="toastCloseBtn" class="btn-secondary">Continue</button>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay" hidden></div>
+  <script src="script.js"></script>
+</body>
+</html>

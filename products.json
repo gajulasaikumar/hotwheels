@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "name": "Nissan Skyline GT-R R34",
+    "brand": "Hot Wheels",
+    "category": "Premium",
+    "price": 1499,
+    "condition": "Carded Mint",
+    "stock": 3,
+    "isNew": true,
+    "image": "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 2,
+    "name": "Toyota Supra MK4",
+    "brand": "Hot Wheels",
+    "category": "Mainline",
+    "price": 699,
+    "condition": "Carded Mint",
+    "stock": 7,
+    "isNew": true,
+    "image": "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 3,
+    "name": "Porsche 911 GT3 RS",
+    "brand": "Hot Wheels",
+    "category": "Boulevard",
+    "price": 1299,
+    "condition": "Near Mint",
+    "stock": 4,
+    "isNew": false,
+    "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 4,
+    "name": "Lamborghini Huracan Team Transport",
+    "brand": "Hot Wheels",
+    "category": "Team Transport",
+    "price": 1799,
+    "condition": "Carded Mint",
+    "stock": 2,
+    "isNew": true,
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 5,
+    "name": "Super Treasure Hunt Camaro",
+    "brand": "Hot Wheels",
+    "category": "Treasure Hunt",
+    "price": 2299,
+    "condition": "Carded Mint",
+    "stock": 1,
+    "isNew": false,
+    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 6,
+    "name": "Mazda RX-7",
+    "brand": "Hot Wheels",
+    "category": "Premium",
+    "price": 1399,
+    "condition": "Carded Mint",
+    "stock": 3,
+    "isNew": true,
+    "image": "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 7,
+    "name": "Ford Mustang GT",
+    "brand": "Matchbox",
+    "category": "Mainline",
+    "price": 499,
+    "condition": "Carded Good",
+    "stock": 6,
+    "isNew": false,
+    "image": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 8,
+    "name": "Nissan GTR R35",
+    "brand": "Mini GT",
+    "category": "Premium",
+    "price": 1999,
+    "condition": "Carded Mint",
+    "stock": 2,
+    "isNew": true,
+    "image": "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=900&q=80"
+  }
+]

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hot Wheels Product | Hot Wheels Garage</title>
+  <meta name="description" content="Hot Wheels product details page.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <p>Trusted Hot Wheels Seller | Secure Packing | PAN India Shipping</p>
+  </div>
+
+  <header class="header">
+    <a href="index.html#home" class="logo">
+      <span>HOT WHEELS</span>
+      <strong>GARAGE</strong>
+    </a>
+    <a class="btn-secondary" href="index.html#hotwheels">Back To Collection</a>
+  </header>
+
+  <main>
+    <section class="product-detail" id="productDetail"></section>
+    <section class="section">
+      <div class="section-head">
+        <h2>You May Also Like</h2>
+      </div>
+      <div class="mini-grid" id="relatedGrid"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="detailToast" role="status" aria-live="polite" hidden>
+    <p id="detailToastText">Item added to cart</p>
+    <div class="toast-actions">
+      <a href="index.html#hotwheels" class="btn-secondary">Continue Shopping</a>
+      <a href="index.html?openCart=1#hotwheels" class="btn-primary">Go To Cart</a>
+    </div>
+  </div>
+
+  <script src="product.js"></script>
+</body>
+</html>
