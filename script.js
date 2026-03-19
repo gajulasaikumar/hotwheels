@@ -440,6 +440,7 @@ function updateFloatingCart(qty) {
   const mobileView = window.matchMedia("(max-width: 700px)").matches;
   const showBar = qty > 0 && mobileView && !cartDrawer.classList.contains("open");
   floatingCartBtn.hidden = !showBar;
+  floatingCartBtn.style.display = showBar ? "" : "none";
 }
 
 function renderCart() {

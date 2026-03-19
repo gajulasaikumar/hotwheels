@@ -762,6 +762,10 @@ main {
   cursor: pointer;
 }
 
+.floating-cart[hidden] {
+  display: none !important;
+}
+
 .floating-cart-text {
   min-width: 0;
   display: flex;
