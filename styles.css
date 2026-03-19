@@ -747,7 +747,7 @@ main {
   left: 50%;
   bottom: max(0.7rem, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: min(74vw, 420px);
+  width: min(74vw, 320px);
   border: 1px solid var(--accent-dark);
   border-radius: 999px;
   background: var(--accent);
@@ -1010,8 +1010,8 @@ main {
   }
 
   .floating-cart-arrow {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
   }
 
   .floating-cart-arrow::before {
