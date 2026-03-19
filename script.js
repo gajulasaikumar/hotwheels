@@ -173,10 +173,14 @@ function renderPriceBlock(item) {
   const showMrp = Number(item.mrp) > Number(item.price);
   const showDiscount = Number(item.discountPercent) > 0;
   return `
-    <div class="price-row">
-      <span class="price">${formatPrice(item.price)}</span>
-      ${showMrp ? `<span class="old-price">${formatPrice(item.mrp)}</span>` : ""}
-      ${showDiscount ? `<span class="discount-pill">${item.discountPercent}% OFF</span>` : ""}
+    <div class="price-block">
+      <div class="price-row">
+        <span class="price">${formatPrice(item.price)}</span>
+      </div>
+      <div class="price-meta">
+        ${showMrp ? `<span class="old-price">${formatPrice(item.mrp)}</span>` : ""}
+        ${showDiscount ? `<span class="discount-pill">${item.discountPercent}% OFF</span>` : ""}
+      </div>
     </div>
   `;
 }
