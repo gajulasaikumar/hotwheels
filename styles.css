@@ -745,15 +745,15 @@ main {
 .floating-cart {
   position: fixed;
   left: 50%;
-  bottom: max(0.7rem, env(safe-area-inset-bottom));
+  bottom: max(0.8rem, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: min(80vw, 250px);
+  width: min(92vw, 420px);
   border: 1px solid var(--accent-dark);
-  border-radius: 14px;
+  border-radius: 999px;
   background: var(--accent);
   color: #fff;
-  padding: 0.48rem 0.72rem;
-  z-index: 24;
+  padding: 0.62rem 0.96rem;
+  z-index: 28;
   box-shadow: 0 9px 20px rgba(143, 36, 20, 0.28);
   display: flex;
   justify-content: space-between;
@@ -763,14 +763,14 @@ main {
 }
 
 .floating-cart-main {
-  font-size: 0.92rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.01em;
 }
 
 .floating-cart-sub {
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 700;
   opacity: 0.92;
   white-space: nowrap;
@@ -941,16 +941,16 @@ main {
   }
 
   .floating-cart {
-    width: min(86vw, 220px);
-    border-radius: 12px;
-    padding: 0.45rem 0.64rem;
+    width: calc(100vw - 1rem);
+    border-radius: 999px;
+    padding: 0.56rem 0.8rem;
   }
 
   .floating-cart-main {
-    font-size: 0.88rem;
+    font-size: 0.92rem;
   }
 
   .floating-cart-sub {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
 }
