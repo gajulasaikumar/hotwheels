@@ -10,6 +10,7 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
 - `script.js` - filters, load-more pagination, stock-safe cart, WhatsApp checkout
 - `product.js` - product detail view and add-to-cart from detail page
 - `products.json` - your inventory source (best for 1000+ products)
+- `inventory.xlsx` - preferred inventory source (if present, site reads this first)
 
 ## Customize for your store
 
@@ -18,9 +19,16 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
 2. Set your shipping rules in `script.js`:
    - `SHIPPING_FLAT_FEE`
    - `FREE_SHIPPING_THRESHOLD`
-3. Replace sample inventory in `products.json` with your real collection.
-4. For each product, keep these fields: `id`, `name`, `brand`, `category`, `price`, `condition`, `stock`, `isNew`, `image`.
-5. Update store name and text in `index.html` for your brand.
+3. Upload `inventory.xlsx` in the project root to auto-load products from Excel.
+4. Supported Excel column names (any one from each group works):
+   - Name: `name` / `title` / `model` / `car`
+   - Brand: `brand` / `make`
+   - Category: `category` / `series` / `type`
+   - Price: `price` / `sellingprice` / `mrp`
+   - Stock: `quantity` / `qty` / `stock`
+   - Image URL: `image` / `pic` / `photo` / `imageurl`
+5. If `inventory.xlsx` is not present, the app falls back to `products.json`.
+6. Update store name and text in `index.html` for your brand.
 
 ## Built-in shopping behavior
 

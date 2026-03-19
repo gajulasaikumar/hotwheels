@@ -3,6 +3,9 @@ const SHIPPING_FLAT_FEE = 120;
 const FREE_SHIPPING_THRESHOLD = 3500;
 const PAGE_SIZE = 12;
 const CART_STORAGE_KEY = "hot_wheels_cart_v1";
+const EXCEL_FILE_PATH = "./inventory.xlsx";
+const JSON_FILE_PATH = "./products.json";
+const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=900&q=80";
 
 let products = [];
 
@@ -53,6 +56,65 @@ const cartToast = document.getElementById("cartToast");
 const toastText = document.getElementById("toastText");
 const chips = Array.from(document.querySelectorAll(".chip"));
 let toastTimer = null;
+
+function normalizeKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function valueFromAliases(row, aliases) {
+  const normalized = {};
+  Object.keys(row).forEach((key) => {
+    normalized[normalizeKey(key)] = row[key];
+  });
+
+  for (const alias of aliases) {
+    const found = normalized[normalizeKey(alias)];
+    if (found !== undefined && String(found).trim() !== "") return found;
+  }
+  return "";
+}
+
+function parsePrice(raw) {
+  const cleaned = String(raw || "").replace(/[^0-9.]/g, "");
+  const value = Number(cleaned);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function parseStock(raw) {
+  const cleaned = String(raw || "").replace(/[^0-9-]/g, "");
+  const value = Number.parseInt(cleaned, 10);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function parseBool(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  return ["true", "yes", "y", "1", "new", "latest"].includes(text);
+}
+
+function mapRowToProduct(row, index) {
+  const name = String(valueFromAliases(row, ["name", "title", "model", "car", "itemname"])).trim();
+  const brand = String(valueFromAliases(row, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
+  const category = String(valueFromAliases(row, ["category", "series", "type", "line"])).trim() || "Mainline";
+  const condition = String(valueFromAliases(row, ["condition", "cardcondition"])).trim() || "Carded Good";
+  const image = String(valueFromAliases(row, ["image", "imageurl", "pic", "photo", "url"])).trim() || PLACEHOLDER_IMAGE;
+  const idRaw = valueFromAliases(row, ["id", "sku", "productid"]);
+  const priceRaw = valueFromAliases(row, ["price", "sellingprice", "mrp", "amount"]);
+  const stockRaw = valueFromAliases(row, ["stock", "quantity", "qty", "available"]);
+  const isNewRaw = valueFromAliases(row, ["isnew", "new", "latest"]);
+
+  const id = Number.parseInt(String(idRaw), 10);
+  return {
+    id: Number.isFinite(id) ? id : index + 1,
+    name,
+    brand,
+    category,
+    price: parsePrice(priceRaw),
+    condition,
+    stock: parseStock(stockRaw),
+    isNew: parseBool(isNewRaw),
+    image
+  };
+}
 
 function formatPrice(value) {
   return `Rs ${value.toLocaleString("en-IN")}`;
@@ -132,7 +194,7 @@ function renderProducts() {
     return `
       <article class="product-card">
         <a class="product-link" href="product.html?id=${item.id}">
-          <img loading="lazy" decoding="async" src="${item.image}" alt="${item.name}">
+          <img loading="lazy" decoding="async" src="${item.image || PLACEHOLDER_IMAGE}" alt="${item.name}">
         </a>
         <div class="product-body">
           <p class="stock ${warnClass}">${item.category} | ${stockText(item.stock)}</p>
@@ -414,12 +476,37 @@ function bindEvents() {
 }
 
 async function loadProducts() {
+  if (typeof XLSX !== "undefined") {
+    try {
+      const excelResponse = await fetch(EXCEL_FILE_PATH, { cache: "no-store" });
+      if (excelResponse.ok) {
+        const buffer = await excelResponse.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheet = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+        const mapped = rows
+          .map((row, index) => mapRowToProduct(row, index))
+          .filter((item) => item.name && Number.isFinite(item.price));
+        if (mapped.length) {
+          products = mapped;
+          return;
+        }
+      }
+    } catch (error) {
+      // Continue to JSON fallback if Excel is not found or invalid.
+    }
+  }
+
   try {
-    const response = await fetch("./products.json", { cache: "no-store" });
+    const response = await fetch(JSON_FILE_PATH, { cache: "no-store" });
     if (!response.ok) throw new Error("Failed to load products.json");
     const data = await response.json();
     if (!Array.isArray(data) || !data.length) throw new Error("Invalid products data");
-    products = data;
+    products = data.map((item, index) => ({
+      ...item,
+      id: Number.isFinite(Number(item.id)) ? Number(item.id) : index + 1,
+      image: item.image || PLACEHOLDER_IMAGE
+    }));
   } catch (error) {
     products = fallbackProducts;
   }

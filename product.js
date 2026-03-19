@@ -1,5 +1,7 @@
 const CART_STORAGE_KEY = "hot_wheels_cart_v1";
 const PRODUCT_DATA_PATH = "./products.json";
+const EXCEL_FILE_PATH = "./inventory.xlsx";
+const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=900&q=80";
 
 const fallbackProducts = [
   { id: 1, name: "Nissan Skyline GT-R R34", brand: "Hot Wheels", category: "Premium", price: 1499, condition: "Carded Mint", stock: 3, image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=900&q=80" },
@@ -11,6 +13,58 @@ const productDetail = document.getElementById("productDetail");
 const relatedGrid = document.getElementById("relatedGrid");
 const detailToast = document.getElementById("detailToast");
 const detailToastText = document.getElementById("detailToastText");
+
+function normalizeKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function valueFromAliases(row, aliases) {
+  const normalized = {};
+  Object.keys(row).forEach((key) => {
+    normalized[normalizeKey(key)] = row[key];
+  });
+
+  for (const alias of aliases) {
+    const found = normalized[normalizeKey(alias)];
+    if (found !== undefined && String(found).trim() !== "") return found;
+  }
+  return "";
+}
+
+function parsePrice(raw) {
+  const cleaned = String(raw || "").replace(/[^0-9.]/g, "");
+  const value = Number(cleaned);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function parseStock(raw) {
+  const cleaned = String(raw || "").replace(/[^0-9-]/g, "");
+  const value = Number.parseInt(cleaned, 10);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function mapRowToProduct(row, index) {
+  const name = String(valueFromAliases(row, ["name", "title", "model", "car", "itemname"])).trim();
+  const brand = String(valueFromAliases(row, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
+  const category = String(valueFromAliases(row, ["category", "series", "type", "line"])).trim() || "Mainline";
+  const condition = String(valueFromAliases(row, ["condition", "cardcondition"])).trim() || "Carded Good";
+  const image = String(valueFromAliases(row, ["image", "imageurl", "pic", "photo", "url"])).trim() || PLACEHOLDER_IMAGE;
+  const idRaw = valueFromAliases(row, ["id", "sku", "productid"]);
+  const priceRaw = valueFromAliases(row, ["price", "sellingprice", "mrp", "amount"]);
+  const stockRaw = valueFromAliases(row, ["stock", "quantity", "qty", "available"]);
+  const id = Number.parseInt(String(idRaw), 10);
+
+  return {
+    id: Number.isFinite(id) ? id : index + 1,
+    name,
+    brand,
+    category,
+    price: parsePrice(priceRaw),
+    condition,
+    stock: parseStock(stockRaw),
+    image
+  };
+}
 
 function formatPrice(value) {
   return `Rs ${value.toLocaleString("en-IN")}`;
@@ -62,7 +116,7 @@ function renderProduct(product) {
   productDetail.innerHTML = `
     <article class="detail-card">
       <div class="detail-image-wrap">
-        <img src="${product.image}" alt="${product.name}">
+        <img src="${product.image || PLACEHOLDER_IMAGE}" alt="${product.name}">
       </div>
       <div class="detail-info">
         <p class="eyebrow">${product.category}</p>
@@ -105,12 +159,34 @@ function renderRelated(products, currentProduct) {
 }
 
 async function loadProducts() {
+  if (typeof XLSX !== "undefined") {
+    try {
+      const excelResponse = await fetch(EXCEL_FILE_PATH, { cache: "no-store" });
+      if (excelResponse.ok) {
+        const buffer = await excelResponse.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheet = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+        const mapped = rows
+          .map((row, index) => mapRowToProduct(row, index))
+          .filter((item) => item.name && Number.isFinite(item.price));
+        if (mapped.length) return mapped;
+      }
+    } catch (error) {
+      // Continue to JSON fallback if Excel is not found or invalid.
+    }
+  }
+
   try {
     const response = await fetch(PRODUCT_DATA_PATH, { cache: "no-store" });
     if (!response.ok) throw new Error("Cannot load products");
     const data = await response.json();
     if (!Array.isArray(data) || !data.length) throw new Error("Invalid products data");
-    return data;
+    return data.map((item, index) => ({
+      ...item,
+      id: Number.isFinite(Number(item.id)) ? Number(item.id) : index + 1,
+      image: item.image || PLACEHOLDER_IMAGE
+    }));
   } catch {
     return fallbackProducts;
   }
