@@ -437,8 +437,7 @@ function computeCartTotals(summary) {
 function updateFloatingCart(qty) {
   if (!floatingCartBtn || !floatingCartCount) return;
   floatingCartCount.textContent = `${qty} item${qty === 1 ? "" : "s"}`;
-  const mobileView = window.matchMedia("(max-width: 700px)").matches;
-  const showBar = qty > 0 && mobileView && !cartDrawer.classList.contains("open");
+  const showBar = qty > 0 && !cartDrawer.classList.contains("open");
   floatingCartBtn.hidden = !showBar;
   floatingCartBtn.style.display = showBar ? "" : "none";
 }
