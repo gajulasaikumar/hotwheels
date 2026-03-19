@@ -745,14 +745,14 @@ main {
 .floating-cart {
   position: fixed;
   left: 50%;
-  bottom: max(0.8rem, env(safe-area-inset-bottom));
+  bottom: max(0.7rem, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: min(92vw, 420px);
+  width: min(76vw, 300px);
   border: 1px solid var(--accent-dark);
   border-radius: 999px;
   background: var(--accent);
   color: #fff;
-  padding: 0.62rem 0.96rem;
+  padding: 0.5rem 0.62rem 0.5rem 0.86rem;
   z-index: 28;
   box-shadow: 0 9px 20px rgba(143, 36, 20, 0.28);
   display: flex;
@@ -762,18 +762,38 @@ main {
   cursor: pointer;
 }
 
+.floating-cart-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
 .floating-cart-main {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.01em;
 }
 
 .floating-cart-sub {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   opacity: 0.92;
   white-space: nowrap;
+}
+
+.floating-cart-arrow {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  background: rgba(118, 23, 11, 0.45);
+  flex: 0 0 auto;
 }
 
 @keyframes fadeUp {
@@ -941,16 +961,21 @@ main {
   }
 
   .floating-cart {
-    width: calc(100vw - 1rem);
-    border-radius: 999px;
-    padding: 0.56rem 0.8rem;
+    width: min(79vw, 285px);
+    padding: 0.48rem 0.56rem 0.48rem 0.76rem;
   }
 
   .floating-cart-main {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
 
   .floating-cart-sub {
-    font-size: 0.78rem;
+    font-size: 0.74rem;
+  }
+
+  .floating-cart-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 1.45rem;
   }
 }
