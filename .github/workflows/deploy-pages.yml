@@ -29,10 +29,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare cache-busted artifact
+        env:
+          ASSET_VERSION: ${{ github.sha }}
+        run: |
+          mkdir -p _site
+          rsync -a --delete --exclude ".git/" --exclude ".github/" ./ ./_site/
+          sed -i "s|href=\"styles.css\"|href=\"styles.css?v=${ASSET_VERSION}\"|g" _site/index.html _site/product.html
+          sed -i "s|src=\"script.js\"|src=\"script.js?v=${ASSET_VERSION}\"|g" _site/index.html
+          sed -i "s|src=\"product.js\"|src=\"product.js?v=${ASSET_VERSION}\"|g" _site/product.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "_site"
 
       - name: Deploy to GitHub Pages
         id: deployment
