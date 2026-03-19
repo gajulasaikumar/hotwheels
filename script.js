@@ -56,7 +56,6 @@ const cartToast = document.getElementById("cartToast");
 const toastText = document.getElementById("toastText");
 const floatingCartBtn = document.getElementById("floatingCartBtn");
 const floatingCartCount = document.getElementById("floatingCartCount");
-const floatingCartTotal = document.getElementById("floatingCartTotal");
 const chips = Array.from(document.querySelectorAll(".chip"));
 let toastTimer = null;
 
@@ -435,10 +434,9 @@ function computeCartTotals(summary) {
   return { qty, subtotal, shipping, total };
 }
 
-function updateFloatingCart(qty, total) {
-  if (!floatingCartBtn || !floatingCartCount || !floatingCartTotal) return;
+function updateFloatingCart(qty) {
+  if (!floatingCartBtn || !floatingCartCount) return;
   floatingCartCount.textContent = `${qty} item${qty === 1 ? "" : "s"}`;
-  floatingCartTotal.textContent = formatPrice(total);
   const mobileView = window.matchMedia("(max-width: 700px)").matches;
   const showBar = qty > 0 && mobileView && !cartDrawer.classList.contains("open");
   floatingCartBtn.hidden = !showBar;
@@ -453,7 +451,7 @@ function renderCart() {
   cartSubtotal.textContent = formatPrice(subtotal);
   shippingFee.textContent = formatPrice(shipping);
   cartTotal.textContent = formatPrice(total);
-  updateFloatingCart(qty, total);
+  updateFloatingCart(qty);
 
   if (!summary.length) {
     cartItems.innerHTML = "<p>Your cart is empty.</p>";
@@ -504,8 +502,8 @@ function closeCart() {
   document.body.classList.remove("cart-open");
   overlay.hidden = true;
   const summary = cartSummary();
-  const { qty, total } = computeCartTotals(summary);
-  updateFloatingCart(qty, total);
+  const { qty } = computeCartTotals(summary);
+  updateFloatingCart(qty);
 }
 
 function openCartIfRequested() {
@@ -651,8 +649,8 @@ function bindEvents() {
 
   window.addEventListener("resize", () => {
     const summary = cartSummary();
-    const { qty, total } = computeCartTotals(summary);
-    updateFloatingCart(qty, total);
+    const { qty } = computeCartTotals(summary);
+    updateFloatingCart(qty);
   });
 }
 
