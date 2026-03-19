@@ -160,14 +160,12 @@ function formatPrice(value) {
 }
 
 function productMetaLine(item) {
-  return [item.brand, item.series, item.scale, item.year].filter(Boolean).join(" | ");
+  return [item.brand, item.series, item.scale].filter(Boolean).join(" | ");
 }
 
 function productSpecsLine(item) {
   const specs = [];
   if (item.sku) specs.push(`SKU: ${item.sku}`);
-  if (item.color) specs.push(`Color: ${item.color}`);
-  if (item.material) specs.push(`Material: ${item.material}`);
   return specs.join(" | ");
 }
 
@@ -252,9 +250,10 @@ function renderProducts() {
 
   productGrid.innerHTML = list.map((item) => {
     const disabled = item.stock <= 0 ? "disabled" : "";
-    const buttonLabel = item.stock <= 0 ? "Sold Out" : "Add to Cart";
     const warnClass = item.stock <= 2 ? "warn" : "";
     const specsLine = productSpecsLine(item);
+    const cartItem = state.cart.find((cart) => cart.productId === item.id);
+    const qty = cartItem ? cartItem.qty : 0;
     return `
       <article class="product-card">
         <a class="product-link" href="product.html?id=${item.id}">
@@ -269,7 +268,17 @@ function renderProducts() {
           <p class="meta">${item.condition}</p>
           <div class="product-foot">
             ${renderPriceBlock(item)}
-            <button class="btn-add" data-id="${item.id}" ${disabled}>${buttonLabel}</button>
+            ${
+              qty > 0
+                ? `
+                  <div class="qty-control">
+                    <button class="qty-btn" data-qty-dec="${item.id}">-</button>
+                    <span class="qty-num">${qty}</span>
+                    <button class="qty-btn" data-qty-inc="${item.id}" ${qty >= item.stock ? "disabled" : ""}>+</button>
+                  </div>
+                `
+                : `<button class="btn-add" data-cart-add="${item.id}" ${disabled}>${item.stock <= 0 ? "Sold Out" : "Add to Cart"}</button>`
+            }
           </div>
         </div>
       </article>
@@ -278,8 +287,16 @@ function renderProducts() {
 
   loadMoreBtn.style.display = filtered.length > list.length ? "inline-flex" : "none";
 
-  productGrid.querySelectorAll("button[data-id]").forEach((button) => {
-    button.addEventListener("click", () => addToCart(Number(button.dataset.id)));
+  productGrid.querySelectorAll("button[data-cart-add]").forEach((button) => {
+    button.addEventListener("click", () => addToCart(Number(button.dataset.cartAdd)));
+  });
+
+  productGrid.querySelectorAll("button[data-qty-inc]").forEach((button) => {
+    button.addEventListener("click", () => adjustCartQty(Number(button.dataset.qtyInc), 1));
+  });
+
+  productGrid.querySelectorAll("button[data-qty-dec]").forEach((button) => {
+    button.addEventListener("click", () => adjustCartQty(Number(button.dataset.qtyDec), -1));
   });
 }
 
@@ -318,28 +335,45 @@ function renderBrands() {
 }
 
 function addToCart(productId) {
-  const product = products.find((item) => item.id === productId);
-  if (!product || product.stock <= 0) return;
-
-  const found = state.cart.find((item) => item.productId === productId);
-  if (found) {
-    if (found.qty >= product.stock) {
-      alert("Only limited stock available for this model.");
-      return;
-    }
-    found.qty += 1;
-  } else {
-    state.cart.push({ productId, qty: 1 });
-  }
-  saveCartToStorage();
-  renderCart();
-  showAddToCartToast(product.name);
+  adjustCartQty(productId, 1, true);
 }
 
 function removeFromCart(productId) {
-  state.cart = state.cart.filter((item) => item.productId !== productId);
+  setCartQty(productId, 0);
+}
+
+function setCartQty(productId, targetQty, showToast = false) {
+  const product = products.find((item) => item.id === productId);
+  if (!product) return;
+
+  if (targetQty > product.stock) {
+    alert("Only limited stock available for this model.");
+  }
+
+  const qty = Math.max(0, Math.min(targetQty, product.stock));
+  const existingIndex = state.cart.findIndex((item) => item.productId === productId);
+
+  if (qty === 0) {
+    if (existingIndex >= 0) state.cart.splice(existingIndex, 1);
+  } else if (existingIndex >= 0) {
+    state.cart[existingIndex].qty = qty;
+  } else {
+    state.cart.push({ productId, qty });
+  }
+
   saveCartToStorage();
   renderCart();
+  renderProducts();
+
+  if (showToast && qty > 0) {
+    showAddToCartToast(product.name);
+  }
+}
+
+function adjustCartQty(productId, delta, showToast = false) {
+  const existing = state.cart.find((item) => item.productId === productId);
+  const currentQty = existing ? existing.qty : 0;
+  setCartQty(productId, currentQty + delta, showToast);
 }
 
 function saveCartToStorage() {
@@ -385,9 +419,24 @@ function renderCart() {
     <article class="cart-item">
       <h4>${item.name}${item.sku ? ` (${item.sku})` : ""}</h4>
       <p>${item.qty} x ${formatPrice(item.price)} = ${formatPrice(item.lineTotal)}</p>
-      <button data-remove-id="${item.id}">Remove</button>
+      <div class="cart-line-controls">
+        <div class="qty-control">
+          <button class="qty-btn" data-cart-dec="${item.id}">-</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" data-cart-inc="${item.id}" ${item.qty >= item.stock ? "disabled" : ""}>+</button>
+        </div>
+        <button class="cart-remove-btn" data-remove-id="${item.id}">Remove</button>
+      </div>
     </article>
   `).join("");
+
+  cartItems.querySelectorAll("button[data-cart-inc]").forEach((button) => {
+    button.addEventListener("click", () => adjustCartQty(Number(button.dataset.cartInc), 1));
+  });
+
+  cartItems.querySelectorAll("button[data-cart-dec]").forEach((button) => {
+    button.addEventListener("click", () => adjustCartQty(Number(button.dataset.cartDec), -1));
+  });
 
   cartItems.querySelectorAll("button[data-remove-id]").forEach((button) => {
     button.addEventListener("click", () => removeFromCart(Number(button.dataset.removeId)));

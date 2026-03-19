@@ -129,38 +129,58 @@ function saveCart(cart) {
 }
 
 function addToCart(product) {
-  if (product.stock <= 0) return;
-  const cart = readCart();
-  const found = cart.find((item) => item.productId === product.id);
-  if (found) {
-    if (found.qty >= product.stock) {
-      alert("Only limited stock available.");
-      return;
-    }
-    found.qty += 1;
-  } else {
-    cart.push({ productId: product.id, qty: 1 });
+  adjustCartQty(product, 1, true);
+}
+
+function setCartQty(product, targetQty, showToast = false) {
+  if (!product) return;
+  if (targetQty > product.stock) {
+    alert("Only limited stock available.");
   }
+
+  const qty = Math.max(0, Math.min(targetQty, product.stock));
+  const cart = readCart();
+  const index = cart.findIndex((item) => item.productId === product.id);
+
+  if (qty === 0) {
+    if (index >= 0) cart.splice(index, 1);
+  } else if (index >= 0) {
+    cart[index].qty = qty;
+  } else {
+    cart.push({ productId: product.id, qty });
+  }
+
   saveCart(cart);
-  detailToastText.textContent = `${product.name} added to cart`;
-  detailToast.hidden = false;
-  setTimeout(() => {
-    detailToast.hidden = true;
-  }, 2400);
+  renderProduct(product);
+
+  if (showToast && qty > 0) {
+    detailToastText.textContent = `${product.name} added to cart`;
+    detailToast.hidden = false;
+    setTimeout(() => {
+      detailToast.hidden = true;
+    }, 2400);
+  }
+}
+
+function adjustCartQty(product, delta, showToast = false) {
+  const cart = readCart();
+  const existing = cart.find((item) => item.productId === product.id);
+  const currentQty = existing ? existing.qty : 0;
+  setCartQty(product, currentQty + delta, showToast);
 }
 
 function renderProduct(product) {
   const buttonDisabled = product.stock <= 0 ? "disabled" : "";
   const stockText = product.stock <= 0 ? "Sold Out" : `In stock: ${product.stock}`;
   const galleryImages = product.images && product.images.length ? product.images : [product.image || PLACEHOLDER_IMAGE];
+  const cart = readCart();
+  const existing = cart.find((item) => item.productId === product.id);
+  const cartQty = existing ? existing.qty : 0;
   const specItems = [
     product.sku ? `SKU: ${product.sku}` : "",
     product.brand ? `Brand: ${product.brand}` : "",
     product.series ? `Series: ${product.series}` : "",
     product.scale ? `Scale: ${product.scale}` : "",
-    product.year ? `Year: ${product.year}` : "",
-    product.color ? `Color: ${product.color}` : "",
-    product.material ? `Material: ${product.material}` : "",
     product.condition ? `Condition: ${product.condition}` : ""
   ].filter(Boolean);
   const showMrp = Number(product.mrp) > Number(product.price);
@@ -191,7 +211,17 @@ function renderProduct(product) {
         ${product.description ? `<p class="meta desc">${product.description}</p>` : ""}
         ${specItems.length ? `<ul class="detail-specs">${specItems.map((line) => `<li>${line}</li>`).join("")}</ul>` : ""}
         <div class="hero-actions">
-          <button id="detailAddBtn" class="btn-primary" ${buttonDisabled}>Add to Cart</button>
+          ${
+            cartQty > 0
+              ? `
+                <div class="qty-control">
+                  <button id="detailQtyDec" class="qty-btn">-</button>
+                  <span class="qty-num">${cartQty}</span>
+                  <button id="detailQtyInc" class="qty-btn" ${cartQty >= product.stock ? "disabled" : ""}>+</button>
+                </div>
+              `
+              : `<button id="detailAddBtn" class="btn-primary" ${buttonDisabled}>Add to Cart</button>`
+          }
           <a class="btn-secondary" href="index.html#hotwheels">Continue Shopping</a>
         </div>
       </div>
@@ -201,6 +231,16 @@ function renderProduct(product) {
   const addBtn = document.getElementById("detailAddBtn");
   if (addBtn) {
     addBtn.addEventListener("click", () => addToCart(product));
+  }
+
+  const incBtn = document.getElementById("detailQtyInc");
+  if (incBtn) {
+    incBtn.addEventListener("click", () => adjustCartQty(product, 1));
+  }
+
+  const decBtn = document.getElementById("detailQtyDec");
+  if (decBtn) {
+    decBtn.addEventListener("click", () => adjustCartQty(product, -1));
   }
 
   const mainImage = document.getElementById("detailMainImage");

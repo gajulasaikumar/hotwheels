@@ -26,7 +26,7 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
    - Pricing: `price`, `sellingprice`, `saleprice`, `mrp`, `discount`
    - Inventory: `quantity`, `qty`, `stock`, `available`
    - Identity: `id`, `sku`, `itemcode`, `productcode`
-   - Product details: `series`, `scale`, `year`, `color`, `material`, `condition`, `description`, `isNew`
+   - Product details: `series`, `scale`, `condition`, `description`, `isNew`
    - Images: `image`, `image2`, `image3` (or `pic`/`photo` variants)
 6. If `inventory.xlsx` is not present, the app falls back to `products.json`.
 7. Update store name and text in `index.html` for your brand.
@@ -34,6 +34,7 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
 ## Built-in shopping behavior
 
 - Add to cart popup (item-added toast)
+- Quantity stepper controls (`-` / count / `+`) on product cards, cart, and detail page
 - Load More for handling large catalogs
 - Click any product card to open its detail page (`product.html?id=<id>`)
 - Advanced filters for category, brand, availability, and sorting

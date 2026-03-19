@@ -311,6 +311,38 @@ main {
   gap: 0.45rem;
 }
 
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: #fff;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-num {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
 .price {
   font-family: "Oswald", sans-serif;
   font-size: 1.2rem;
@@ -593,8 +625,15 @@ main {
   color: var(--muted);
 }
 
-.cart-item button {
-  margin-top: 0.4rem;
+.cart-line-controls {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cart-remove-btn {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: #fff;
