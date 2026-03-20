@@ -36,13 +36,13 @@
     </section>
   </main>
 
-  <div class="toast" id="detailToast" role="status" aria-live="polite" hidden>
-    <p id="detailToastText">Item added to cart</p>
-    <div class="toast-actions">
-      <a href="index.html#hotwheels" class="btn-secondary">Continue Shopping</a>
-      <a href="index.html?openCart=1#hotwheels" class="btn-primary">Go To Cart</a>
-    </div>
-  </div>
+  <a id="floatingCartBtn" class="floating-cart" href="index.html?openCart=1#hotwheels" aria-label="View cart" hidden>
+    <span class="floating-cart-text">
+      <span class="floating-cart-main">View cart</span>
+      <span id="floatingCartCount" class="floating-cart-sub">0 items</span>
+    </span>
+    <span class="floating-cart-arrow" aria-hidden="true"></span>
+  </a>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="product.js"></script>
