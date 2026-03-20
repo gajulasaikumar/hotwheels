@@ -283,10 +283,13 @@ function renderRelated(products, currentProduct) {
 
   relatedGrid.innerHTML = related
     .map((item) => `
-      <a href="product.html?id=${item.id}" class="tile product-link">
-        <h4>${item.name}</h4>
-        <p>${item.brand} | ${item.category}</p>
-        <p>${formatPrice(item.price)}</p>
+      <a href="product.html?id=${item.id}" class="tile product-link arrival-card arrival-link">
+        <img loading="lazy" decoding="async" src="${item.image || PLACEHOLDER_IMAGE}" alt="${item.name}">
+        <div class="arrival-body">
+          <h4>${item.name}</h4>
+          <p>${item.brand} | ${item.category}</p>
+          <p class="arrival-price">${formatPrice(item.price)}</p>
+        </div>
       </a>
     `)
     .join("");
