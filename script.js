@@ -461,8 +461,8 @@ function computeCartTotals(summary) {
   const qty = summary.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = summary.reduce((sum, item) => sum + item.lineTotal, 0);
   let shipping = 0;
-  if (qty > 0 && qty <= 6) shipping = SHIPPING_UP_TO_SIX;
-  else if (qty >= 7 && qty < 10) shipping = SHIPPING_SEVEN_TO_NINE;
+  if (qty > 0 && qty < 6) shipping = SHIPPING_UP_TO_SIX;
+  else if (qty >= 6 && qty <= 10) shipping = SHIPPING_SEVEN_TO_NINE;
   const total = subtotal + shipping;
   return { qty, subtotal, shipping, total };
 }
