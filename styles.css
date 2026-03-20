@@ -58,19 +58,35 @@ body.cart-open {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
   color: var(--text);
   line-height: 1;
 }
 
-.logo span,
-.logo strong {
+.logo-mark {
+  width: 3.45rem;
+  height: 3.45rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.logo-text span,
+.logo-text strong {
   display: block;
   font-family: "Oswald", sans-serif;
   letter-spacing: 0.05em;
 }
 
-.logo strong {
+.logo-text strong {
   font-size: 1.35rem;
 }
 
