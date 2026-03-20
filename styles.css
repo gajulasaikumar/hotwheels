@@ -981,6 +981,23 @@ main {
     width: 36px;
     height: 36px;
   }
+
+  .toast {
+    left: 50%;
+    right: auto;
+    bottom: calc(4.9rem + env(safe-area-inset-bottom));
+    width: min(92vw, 360px);
+    transform: translateX(-50%);
+  }
+
+  .toast-actions {
+    justify-content: stretch;
+  }
+
+  .toast-actions .btn-primary,
+  .toast-actions .btn-secondary {
+    flex: 1 1 0;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1067,5 +1084,19 @@ main {
     height: 9px;
     border-right-width: 2.2px;
     border-bottom-width: 2.2px;
+  }
+
+  .toast {
+    bottom: calc(4.6rem + env(safe-area-inset-bottom));
+    width: calc(100vw - 1rem);
+  }
+
+  .toast-actions {
+    flex-direction: column;
+  }
+
+  .toast-actions .btn-primary,
+  .toast-actions .btn-secondary {
+    width: 100%;
   }
 }

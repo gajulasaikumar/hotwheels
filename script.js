@@ -473,6 +473,18 @@ function updateFloatingCart(qty) {
   floatingCartBtn.style.display = showBar ? "" : "none";
 }
 
+function hideAddToCartToast() {
+  if (!cartToast) return;
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+  cartToast.hidden = true;
+  const summary = cartSummary();
+  const { qty } = computeCartTotals(summary);
+  updateFloatingCart(qty);
+}
+
 function renderCart() {
   const summary = cartSummary();
   const { qty, subtotal, shipping, total } = computeCartTotals(summary);
@@ -520,6 +532,7 @@ function renderCart() {
 }
 
 function openCart() {
+  hideAddToCartToast();
   cartDrawer.classList.add("open");
   cartDrawer.setAttribute("aria-hidden", "false");
   document.body.classList.add("cart-open");
@@ -550,15 +563,15 @@ function openWhatsAppOrder(prefillText) {
 
 function showAddToCartToast(name) {
   if (!cartToast || !toastText) return;
-  if (toastTimer) {
-    clearTimeout(toastTimer);
-    toastTimer = null;
-  }
+  hideAddToCartToast();
   toastText.textContent = `${name} added to cart`;
   cartToast.hidden = false;
+  if (floatingCartBtn) {
+    floatingCartBtn.hidden = true;
+    floatingCartBtn.style.display = "none";
+  }
   toastTimer = setTimeout(() => {
-    cartToast.hidden = true;
-    toastTimer = null;
+    hideAddToCartToast();
   }, 2400);
 }
 
@@ -684,11 +697,11 @@ function bindEvents() {
   document.getElementById("closeCartBtn").addEventListener("click", closeCart);
   document.getElementById("checkoutBtn").addEventListener("click", checkoutOnWhatsApp);
   document.getElementById("toastViewCartBtn").addEventListener("click", () => {
-    cartToast.hidden = true;
+    hideAddToCartToast();
     openCart();
   });
   document.getElementById("toastCloseBtn").addEventListener("click", () => {
-    cartToast.hidden = true;
+    hideAddToCartToast();
   });
   document.getElementById("contactWhatsAppBtn").addEventListener("click", () => {
     openWhatsAppOrder("Hi, I need help selecting Hot Wheels models.");
