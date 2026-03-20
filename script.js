@@ -1,6 +1,6 @@
 const STORE_WHATSAPP_NUMBER = "917013266345";
-const SHIPPING_FLAT_FEE = 120;
-const FREE_SHIPPING_THRESHOLD = 3500;
+const SHIPPING_UP_TO_SIX = 160;
+const SHIPPING_SEVEN_TO_NINE = 200;
 const PAGE_SIZE = 12;
 const CART_STORAGE_KEY = "hot_wheels_cart_v1";
 const EXCEL_FILE_PATH = "./inventory.xlsx";
@@ -460,7 +460,9 @@ function cartSummary() {
 function computeCartTotals(summary) {
   const qty = summary.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = summary.reduce((sum, item) => sum + item.lineTotal, 0);
-  const shipping = subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD ? SHIPPING_FLAT_FEE : 0;
+  let shipping = 0;
+  if (qty > 0 && qty <= 6) shipping = SHIPPING_UP_TO_SIX;
+  else if (qty >= 7 && qty < 10) shipping = SHIPPING_SEVEN_TO_NINE;
   const total = subtotal + shipping;
   return { qty, subtotal, shipping, total };
 }
