@@ -498,6 +498,34 @@ main {
   background: #fff;
 }
 
+.arrival-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.arrival-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.arrival-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #f3ede3;
+}
+
+.arrival-body {
+  padding: 0.75rem;
+}
+
+.arrival-price {
+  font-weight: 700;
+  color: var(--text);
+}
+
 .brand-tile {
   text-align: left;
   cursor: pointer;
@@ -964,6 +992,10 @@ main {
 
   .product-card img {
     height: 130px;
+  }
+
+  .arrival-card img {
+    aspect-ratio: 1 / 1;
   }
 
   .product-body {

@@ -351,11 +351,21 @@ function renderProducts() {
 
 function renderNewArrivals() {
   const arrivals = products.filter((item) => item.isNew).slice(0, 4);
+  if (!arrivals.length) {
+    newArrivalGrid.innerHTML = "<p>No new arrivals added yet.</p>";
+    return;
+  }
+
   newArrivalGrid.innerHTML = arrivals.map((item) => `
-    <article class="tile">
-      <h4>${item.name}</h4>
-      <p>${item.brand} | ${item.category}</p>
-      <p>${formatPrice(item.price)}</p>
+    <article class="tile arrival-card">
+      <a class="arrival-link" href="product.html?id=${item.id}">
+        <img loading="lazy" decoding="async" src="${item.image || PLACEHOLDER_IMAGE}" alt="${item.name}">
+        <div class="arrival-body">
+          <h4>${item.name}</h4>
+          <p>${item.brand} | ${item.category}</p>
+          <p class="arrival-price">${formatPrice(item.price)}</p>
+        </div>
+      </a>
     </article>
   `).join("");
 }
