@@ -12,8 +12,8 @@ const fallbackProducts = [
 
 const productDetail = document.getElementById("productDetail");
 const relatedGrid = document.getElementById("relatedGrid");
-const detailToast = document.getElementById("detailToast");
-const detailToastText = document.getElementById("detailToastText");
+const floatingCartBtn = document.getElementById("floatingCartBtn");
+const floatingCartCount = document.getElementById("floatingCartCount");
 
 function normalizeKey(value) {
   return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -145,6 +145,19 @@ function saveCart(cart) {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
 }
 
+function cartQty(cart = readCart()) {
+  return cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+}
+
+function updateFloatingCart() {
+  if (!floatingCartBtn || !floatingCartCount) return;
+  const qty = cartQty();
+  floatingCartCount.textContent = `${qty} item${qty === 1 ? "" : "s"}`;
+  const showBar = qty > 0;
+  floatingCartBtn.hidden = !showBar;
+  floatingCartBtn.style.display = showBar ? "" : "none";
+}
+
 function addToCart(product) {
   adjustCartQty(product, 1, true);
 }
@@ -169,14 +182,7 @@ function setCartQty(product, targetQty, showToast = false) {
 
   saveCart(cart);
   renderProduct(product);
-
-  if (showToast && qty > 0) {
-    detailToastText.textContent = `${product.name} added to cart`;
-    detailToast.hidden = false;
-    setTimeout(() => {
-      detailToast.hidden = true;
-    }, 2400);
-  }
+  updateFloatingCart();
 }
 
 function adjustCartQty(product, delta, showToast = false) {
@@ -335,6 +341,7 @@ async function init() {
   }
   renderProduct(selected);
   renderRelated(products, selected);
+  updateFloatingCart();
 }
 
 init();
