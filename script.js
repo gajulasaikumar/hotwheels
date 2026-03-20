@@ -549,11 +549,17 @@ function openWhatsAppOrder(prefillText) {
 }
 
 function showAddToCartToast(name) {
+  if (!cartToast || !toastText) return;
   if (toastTimer) {
     clearTimeout(toastTimer);
     toastTimer = null;
   }
-  cartToast.hidden = true;
+  toastText.textContent = `${name} added to cart`;
+  cartToast.hidden = false;
+  toastTimer = setTimeout(() => {
+    cartToast.hidden = true;
+    toastTimer = null;
+  }, 2400);
 }
 
 function checkoutOnWhatsApp() {
