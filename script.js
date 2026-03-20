@@ -558,7 +558,7 @@ function openCartIfRequested() {
 }
 
 function openWhatsAppOrder(prefillText) {
-  window.open(`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${prefillText}`, "_blank");
+  window.open(`https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(prefillText)}`, "_blank");
 }
 
 function showAddToCartToast(name) {
@@ -578,11 +578,11 @@ function checkoutOnWhatsApp() {
     return `- ${item.name}${sku} | Qty: ${item.qty} | ${formatPrice(item.lineTotal)}`;
   });
   const message =
-    `Hi, I want to order these Hot Wheels:%0A%0A${lines.join("%0A")}` +
-    `%0A%0ASubtotal: ${formatPrice(subtotal)}` +
-    `%0AShipping: ${formatPrice(shipping)}` +
-    `%0ATotal: ${formatPrice(total)}` +
-    `%0A%0AName:%0APhone:%0AAddress:%0APincode:`;
+    `Hi, I want to order these Hot Wheels:\n\n${lines.join("\n")}` +
+    `\n\nSubtotal: ${formatPrice(subtotal)}` +
+    `\nShipping: ${formatPrice(shipping)}` +
+    `\nTotal: ${formatPrice(total)}` +
+    `\n\nName:\nPhone:\nAddress:\nPincode:`;
 
   openWhatsAppOrder(message);
 }
