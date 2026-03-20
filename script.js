@@ -576,11 +576,11 @@ function checkoutOnWhatsApp() {
 
   const { subtotal, shipping, total } = computeCartTotals(summary);
   const lines = summary.map((item) => {
-    const sku = item.sku ? ` | SKU: ${item.sku}` : "";
-    return `- ${item.name}${sku} | Qty: ${item.qty} | ${formatPrice(item.lineTotal)}`;
+    const color = item.color ? item.color : "-";
+    return `- ${item.name} | ${color} | ${item.qty} | ${formatPrice(item.lineTotal)}`;
   });
   const message =
-    `Hi, I want to order these Hot Wheels:\n\n${lines.join("\n")}` +
+    `Hi, I want to order these Hot Wheels:\n\nName | Color | Qty | Price\n${lines.join("\n")}` +
     `\n\nSubtotal: ${formatPrice(subtotal)}` +
     `\nShipping: ${formatPrice(shipping)}` +
     `\nTotal: ${formatPrice(total)}` +
