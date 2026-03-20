@@ -259,22 +259,26 @@ function resetVisibleCount() {
 
 function initFilters() {
   const categories = [...new Set(products.map((p) => p.category))];
-  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
-  categories.forEach((category) => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    categoryFilter.append(option);
-  });
+  if (categoryFilter) {
+    categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+    categories.forEach((category) => {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      categoryFilter.append(option);
+    });
+  }
 
   const brands = [...new Set(products.map((p) => p.brand))];
-  brandFilter.innerHTML = '<option value="all">All Brands</option>';
-  brands.forEach((brand) => {
-    const option = document.createElement("option");
-    option.value = brand;
-    option.textContent = brand;
-    brandFilter.append(option);
-  });
+  if (brandFilter) {
+    brandFilter.innerHTML = '<option value="all">All Brands</option>';
+    brands.forEach((brand) => {
+      const option = document.createElement("option");
+      option.value = brand;
+      option.textContent = brand;
+      brandFilter.append(option);
+    });
+  }
 }
 
 function getVisibleProducts() {
@@ -371,7 +375,7 @@ function renderBrands() {
   brandGrid.querySelectorAll("button[data-brand]").forEach((button) => {
     button.addEventListener("click", () => {
       state.brand = button.dataset.brand;
-      brandFilter.value = state.brand;
+      if (brandFilter) brandFilter.value = state.brand;
       resetVisibleCount();
       renderProducts();
       document.getElementById("hotwheels").scrollIntoView({ behavior: "smooth" });
@@ -565,73 +569,89 @@ function checkoutOnWhatsApp() {
 }
 
 function bindEvents() {
-  searchInput.addEventListener("input", (event) => {
-    state.query = event.target.value.trim();
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (searchInput) {
+    searchInput.addEventListener("input", (event) => {
+      state.query = event.target.value.trim();
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  categoryFilter.addEventListener("change", (event) => {
-    state.category = event.target.value;
-    setActiveChip(state.category);
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (categoryFilter) {
+    categoryFilter.addEventListener("change", (event) => {
+      state.category = event.target.value;
+      setActiveChip(state.category);
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  brandFilter.addEventListener("change", (event) => {
-    state.brand = event.target.value;
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (brandFilter) {
+    brandFilter.addEventListener("change", (event) => {
+      state.brand = event.target.value;
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  availabilityFilter.addEventListener("change", (event) => {
-    state.availability = event.target.value;
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (availabilityFilter) {
+    availabilityFilter.addEventListener("change", (event) => {
+      state.availability = event.target.value;
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  sortSelect.addEventListener("change", (event) => {
-    state.sort = event.target.value;
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (sortSelect) {
+    sortSelect.addEventListener("change", (event) => {
+      state.sort = event.target.value;
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  priceFromInput.addEventListener("input", (event) => {
-    state.priceFrom = event.target.value.trim();
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (priceFromInput) {
+    priceFromInput.addEventListener("input", (event) => {
+      state.priceFrom = event.target.value.trim();
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  priceToInput.addEventListener("input", (event) => {
-    state.priceTo = event.target.value.trim();
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (priceToInput) {
+    priceToInput.addEventListener("input", (event) => {
+      state.priceTo = event.target.value.trim();
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
-  clearFiltersBtn.addEventListener("click", () => {
-    state.query = "";
-    state.category = "all";
-    state.brand = "all";
-    state.availability = "all";
-    state.sort = "featured";
-    state.priceFrom = "";
-    state.priceTo = "";
-    searchInput.value = "";
-    categoryFilter.value = "all";
-    brandFilter.value = "all";
-    availabilityFilter.value = "all";
-    sortSelect.value = "featured";
-    priceFromInput.value = "";
-    priceToInput.value = "";
-    setActiveChip("all");
-    resetVisibleCount();
-    renderProducts();
-  });
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener("click", () => {
+      state.query = "";
+      state.category = "all";
+      state.brand = "all";
+      state.availability = "all";
+      state.sort = "featured";
+      state.priceFrom = "";
+      state.priceTo = "";
+      if (searchInput) searchInput.value = "";
+      if (categoryFilter) categoryFilter.value = "all";
+      if (brandFilter) brandFilter.value = "all";
+      if (availabilityFilter) availabilityFilter.value = "all";
+      if (sortSelect) sortSelect.value = "featured";
+      if (priceFromInput) priceFromInput.value = "";
+      if (priceToInput) priceToInput.value = "";
+      setActiveChip("all");
+      resetVisibleCount();
+      renderProducts();
+    });
+  }
 
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       state.category = chip.dataset.chip;
-      categoryFilter.value = state.category;
+      if (categoryFilter) categoryFilter.value = state.category;
       setActiveChip(state.category);
       resetVisibleCount();
       renderProducts();
