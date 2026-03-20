@@ -243,6 +243,34 @@ main {
   grid-column: span 2;
 }
 
+.catalog-toolbar {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.catalog-search-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.82rem 1rem;
+  font-family: inherit;
+  font-size: 0.96rem;
+  background: #fff;
+}
+
+.catalog-toolbar .btn-secondary {
+  white-space: nowrap;
+}
+
+.search-help {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .results-info {
   margin: 0.65rem 0 0;
   color: var(--muted);
@@ -261,6 +289,56 @@ main {
   margin-top: 0.9rem;
   display: flex;
   justify-content: center;
+}
+
+.pagination {
+  margin-top: 0.95rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.pagination[hidden] {
+  display: none !important;
+}
+
+.pagination-btn,
+.pagination-ellipsis {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.94rem;
+}
+
+.pagination-btn {
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pagination-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent-dark);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+  min-width: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border-color: transparent;
+  background: transparent;
 }
 
 .product-card {
@@ -897,6 +975,14 @@ main {
     grid-template-columns: 1fr;
   }
 
+  .catalog-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-toolbar .btn-secondary {
+    width: 100%;
+  }
+
   .product-grid,
   .mini-grid,
   .brand-grid {
@@ -905,6 +991,14 @@ main {
 
   .search-wide {
     grid-column: auto;
+  }
+
+  .pagination-btn,
+  .pagination-ellipsis {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.68rem;
+    font-size: 0.88rem;
   }
 
   main {

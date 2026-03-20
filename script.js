@@ -29,7 +29,7 @@ const state = {
   sort: "featured",
   priceFrom: "",
   priceTo: "",
-  visibleCount: PAGE_SIZE,
+  currentPage: 1,
   cart: []
 };
 
@@ -45,7 +45,7 @@ const priceFromInput = document.getElementById("priceFromInput");
 const priceToInput = document.getElementById("priceToInput");
 const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 const resultsInfo = document.getElementById("resultsInfo");
-const loadMoreBtn = document.getElementById("loadMoreBtn");
+const paginationControls = document.getElementById("paginationControls");
 const cartCount = document.getElementById("cartCount");
 const cartSubtotal = document.getElementById("cartSubtotal");
 const shippingFee = document.getElementById("shippingFee");
@@ -62,6 +62,69 @@ let toastTimer = null;
 
 function normalizeKey(value) {
   return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function normalizeSearchValue(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function tokenizeSearchValue(value) {
+  const normalized = normalizeSearchValue(value);
+  return normalized ? normalized.split(" ") : [];
+}
+
+function levenshteinDistance(source, target) {
+  if (source === target) return 0;
+  if (!source.length) return target.length;
+  if (!target.length) return source.length;
+
+  const previous = Array.from({ length: target.length + 1 }, (_, index) => index);
+
+  for (let row = 1; row <= source.length; row += 1) {
+    let diagonal = previous[0];
+    previous[0] = row;
+
+    for (let column = 1; column <= target.length; column += 1) {
+      const saved = previous[column];
+      const cost = source[row - 1] === target[column - 1] ? 0 : 1;
+      previous[column] = Math.min(
+        previous[column] + 1,
+        previous[column - 1] + 1,
+        diagonal + cost
+      );
+      diagonal = saved;
+    }
+  }
+
+  return previous[target.length];
+}
+
+function matchesSearchToken(queryToken, candidateToken) {
+  if (!queryToken || !candidateToken) return false;
+  if (candidateToken.includes(queryToken) || queryToken.includes(candidateToken)) return true;
+
+  const lengthGap = Math.abs(queryToken.length - candidateToken.length);
+  if (lengthGap > 2) return false;
+
+  const maxDistance = queryToken.length >= 6 ? 2 : 1;
+  return levenshteinDistance(queryToken, candidateToken) <= maxDistance;
+}
+
+function matchesSearchQuery(item, query) {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery) return true;
+  if (item.searchIndex.includes(normalizedQuery)) return true;
+
+  const queryTokens = tokenizeSearchValue(normalizedQuery);
+  if (!queryTokens.length) return true;
+
+  return queryTokens.every((queryToken) =>
+    item.searchTokens.some((candidateToken) => matchesSearchToken(queryToken, candidateToken))
+  );
 }
 
 function valueFromAliases(row, aliases) {
@@ -166,7 +229,9 @@ function normalizeProduct(raw, index) {
     color,
     series,
     material,
-    description
+    description,
+    searchIndex: normalizeSearchValue([name, brand, category, series, sku, color].filter(Boolean).join(" ")),
+    searchTokens: tokenizeSearchValue([name, brand, category, series, sku, color].filter(Boolean).join(" "))
   };
 }
 
@@ -254,7 +319,7 @@ function setActiveChip(category) {
 }
 
 function resetVisibleCount() {
-  state.visibleCount = PAGE_SIZE;
+  state.currentPage = 1;
 }
 
 function initFilters() {
@@ -283,7 +348,7 @@ function initFilters() {
 
 function getVisibleProducts() {
   let filtered = products.filter((item) => {
-    const byQuery = `${item.name} ${item.brand}`.toLowerCase().includes(state.query.toLowerCase());
+    const byQuery = matchesSearchQuery(item, state.query);
     const byCategory = state.category === "all" || item.category === state.category;
     const byBrand = state.brand === "all" || item.brand === state.brand;
     const byAvailability =
@@ -303,6 +368,72 @@ function getVisibleProducts() {
   return filtered;
 }
 
+function getPaginationItems(totalPages, currentPage) {
+  const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+
+  if (currentPage <= 3) {
+    pages.add(2);
+    pages.add(3);
+  }
+
+  if (currentPage >= totalPages - 2) {
+    pages.add(totalPages - 1);
+    pages.add(totalPages - 2);
+  }
+
+  const orderedPages = [...pages].filter((page) => page >= 1 && page <= totalPages).sort((a, b) => a - b);
+  const items = [];
+
+  orderedPages.forEach((page, index) => {
+    const previousPage = orderedPages[index - 1];
+    if (index > 0 && page - previousPage > 1) items.push("ellipsis");
+    items.push(page);
+  });
+
+  return items;
+}
+
+function renderPagination(totalPages) {
+  if (!paginationControls) return;
+
+  if (totalPages <= 1) {
+    paginationControls.hidden = true;
+    paginationControls.innerHTML = "";
+    return;
+  }
+
+  const items = getPaginationItems(totalPages, state.currentPage);
+  paginationControls.hidden = false;
+  paginationControls.innerHTML = `
+    <button class="pagination-btn" data-page-nav="prev" ${state.currentPage === 1 ? "disabled" : ""}>Prev</button>
+    ${items
+      .map((item) =>
+        item === "ellipsis"
+          ? '<span class="pagination-ellipsis" aria-hidden="true">...</span>'
+          : `<button class="pagination-btn ${item === state.currentPage ? "active" : ""}" data-page="${item}" ${item === state.currentPage ? 'aria-current="page"' : ""}>${item}</button>`
+      )
+      .join("")}
+    <button class="pagination-btn" data-page-nav="next" ${state.currentPage === totalPages ? "disabled" : ""}>Next</button>
+  `;
+
+  paginationControls.querySelectorAll("button[data-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.currentPage = Number(button.dataset.page);
+      renderProducts();
+      document.getElementById("hotwheels").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  paginationControls.querySelectorAll("button[data-page-nav]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const direction = button.dataset.pageNav === "next" ? 1 : -1;
+      state.currentPage += direction;
+      renderProducts();
+      document.getElementById("hotwheels").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
 function stockText(stock) {
   if (stock <= 0) return "Sold out";
   if (stock <= 2) return `Low stock: ${stock}`;
@@ -311,14 +442,21 @@ function stockText(stock) {
 
 function renderProducts() {
   const filtered = getVisibleProducts();
-  const list = filtered.slice(0, state.visibleCount);
-  resultsInfo.textContent = `${filtered.length} products | Showing ${list.length}`;
-
-  if (!list.length) {
-    productGrid.innerHTML = "<p>No products found with this filter.</p>";
-    loadMoreBtn.style.display = "none";
+  if (!filtered.length) {
+    resultsInfo.textContent = state.query
+      ? `0 products | No matches for "${state.query}"`
+      : "0 products";
+    productGrid.innerHTML = "<p>No products found with this search.</p>";
+    renderPagination(0);
     return;
   }
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  state.currentPage = Math.min(Math.max(state.currentPage, 1), totalPages);
+  const startIndex = (state.currentPage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, filtered.length);
+  const list = filtered.slice(startIndex, endIndex);
+  resultsInfo.textContent = `${filtered.length} products | Showing ${startIndex + 1}-${endIndex} | Page ${state.currentPage} of ${totalPages}`;
 
   productGrid.innerHTML = list.map((item) => {
     const warnClass = item.stock <= 2 ? "warn" : "";
@@ -345,7 +483,7 @@ function renderProducts() {
     `;
   }).join("");
 
-  loadMoreBtn.style.display = filtered.length > list.length ? "inline-flex" : "none";
+  renderPagination(totalPages);
   bindProductActionEvents(productGrid);
 }
 
@@ -461,8 +599,8 @@ function computeCartTotals(summary) {
   const qty = summary.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = summary.reduce((sum, item) => sum + item.lineTotal, 0);
   let shipping = 0;
-  if (qty > 0 && qty < 6) shipping = SHIPPING_UP_TO_SIX;
-  else if (qty >= 6 && qty <= 10) shipping = SHIPPING_SEVEN_TO_NINE;
+  if (qty > 0 && qty <= 6) shipping = SHIPPING_UP_TO_SIX;
+  else if (qty >= 7 && qty < 10) shipping = SHIPPING_SEVEN_TO_NINE;
   const total = subtotal + shipping;
   return { qty, subtotal, shipping, total };
 }
@@ -678,11 +816,6 @@ function bindEvents() {
       renderProducts();
       document.getElementById("hotwheels").scrollIntoView({ behavior: "smooth" });
     });
-  });
-
-  loadMoreBtn.addEventListener("click", () => {
-    state.visibleCount += PAGE_SIZE;
-    renderProducts();
   });
 
   document.getElementById("openCartBtn").addEventListener("click", openCart);

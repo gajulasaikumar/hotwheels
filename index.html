@@ -65,41 +65,24 @@
     </section>
 
     <section id="hotwheels" class="section">
-      <!-- <div class="section-head">
+      <div class="section-head">
         <h2>Hot Wheels Collection</h2>
-        <p>1000+ Hot Wheels models with simple filters and fast ordering.</p>
-      </div> -->
-      <!-- Filters temporarily hidden
-      <div class="controls">
-        <input id="searchInput" class="search-wide" type="search" placeholder="Search by name (example: Skyline)">
-        <select id="categoryFilter">
-          <option value="all">All Categories</option>
-        </select>
-        <select id="brandFilter">
-          <option value="all">All Brands</option>
-        </select>
-        <select id="availabilityFilter">
-          <option value="all">All Availability</option>
-          <option value="in-stock">In Stock</option>
-          <option value="sold-out">Sold Out</option>
-        </select>
-        <select id="sortSelect">
-          <option value="featured">Sort: Featured</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="name-az">Name: A-Z</option>
-          <option value="name-za">Name: Z-A</option>
-        </select>
-        <input id="priceFromInput" type="number" min="0" placeholder="Price from">
-        <input id="priceToInput" type="number" min="0" placeholder="Price to">
-        <button id="clearFiltersBtn" class="btn-secondary" type="button">Clear Filters</button>
+        <p>1000+ Hot Wheels models with quick search and easy page browsing.</p>
       </div>
-      -->
+      <div class="catalog-toolbar">
+        <input
+          id="searchInput"
+          class="catalog-search-input"
+          type="search"
+          placeholder="Search by car name or brand (example: Nissan, Porsche)"
+          aria-label="Search Hot Wheels collection"
+        >
+        <button id="clearFiltersBtn" class="btn-secondary" type="button">Clear</button>
+      </div>
+      <p class="search-help">Search by name or brand. Close spellings like "nisaon" will also match Nissan models.</p>
       <p id="resultsInfo" class="results-info"></p>
       <div id="productGrid" class="product-grid"></div>
-      <div class="load-wrap">
-        <button id="loadMoreBtn" class="btn-secondary">Load More</button>
-      </div>
+      <div id="paginationControls" class="pagination" aria-label="Product pages" hidden></div>
     </section>
 
     <section id="new-arrivals" class="section">
