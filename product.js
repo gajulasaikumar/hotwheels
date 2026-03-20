@@ -158,6 +158,10 @@ function updateFloatingCart() {
   floatingCartBtn.style.display = showBar ? "" : "none";
 }
 
+function openMainCart() {
+  window.location.href = "index.html?openCart=1#hotwheels";
+}
+
 function addToCart(product) {
   adjustCartQty(product, 1, true);
 }
@@ -342,6 +346,10 @@ async function init() {
   renderProduct(selected);
   renderRelated(products, selected);
   updateFloatingCart();
+
+  if (floatingCartBtn) {
+    floatingCartBtn.addEventListener("click", openMainCart);
+  }
 }
 
 init();
