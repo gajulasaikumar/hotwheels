@@ -31,6 +31,16 @@ This is a user-friendly, multi-navigation Hot Wheels storefront for selling onli
 6. If `inventory.xlsx` is not present, the app falls back to `products.json`.
 7. Update store name and text in `index.html` for your brand.
 
+## Images from Excel
+
+- Do not insert pictures directly into Excel cells. The site does not read embedded Excel images.
+- Put your photo files inside an `images` folder in the project root.
+- In Excel, type only the filename in the `image`, `image2`, or `image3` column.
+- Example: `bmw-e36-m3-race.jpg`
+- The site will automatically load that as `images/bmw-e36-m3-race.jpg`
+- You can also type a full URL if the image is hosted online.
+- Recommended naming style: lowercase letters, numbers, and `-` only.
+
 ## Built-in shopping behavior
 
 - Add to cart popup (item-added toast)

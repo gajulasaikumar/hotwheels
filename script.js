@@ -5,6 +5,7 @@ const PAGE_SIZE = 12;
 const CART_STORAGE_KEY = "hot_wheels_cart_v1";
 const EXCEL_FILE_PATH = "./inventory.xlsx";
 const JSON_FILE_PATH = "./products.json";
+const IMAGE_FOLDER_PATH = "images/";
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=900&q=80";
 
 let products = [];
@@ -103,14 +104,30 @@ function parseDiscount(raw, mrp, salePrice) {
   return 0;
 }
 
+function normalizeImagePath(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+
+  const isAbsoluteUrl = /^(https?:)?\/\//i.test(value);
+  const isInlineAsset = /^(data:|blob:)/i.test(value);
+  const isRelativePath =
+    value.startsWith("./") ||
+    value.startsWith("../") ||
+    value.startsWith("/") ||
+    value.startsWith(IMAGE_FOLDER_PATH);
+
+  if (isAbsoluteUrl || isInlineAsset || isRelativePath) return value;
+  return `${IMAGE_FOLDER_PATH}${value}`;
+}
+
 function normalizeProduct(raw, index) {
   const name = String(valueFromAliases(raw, ["name", "title", "model", "car", "itemname", "productname"])).trim();
   const brand = String(valueFromAliases(raw, ["brand", "make", "manufacturer"])).trim() || "Hot Wheels";
   const category = String(valueFromAliases(raw, ["category", "series", "type", "line"])).trim() || "Mainline";
   const condition = String(valueFromAliases(raw, ["condition", "cardcondition"])).trim() || "Carded Good";
-  const image1 = String(valueFromAliases(raw, ["image", "imageurl", "pic", "photo", "url"])).trim();
-  const image2 = String(valueFromAliases(raw, ["image2", "pic2", "photo2"])).trim();
-  const image3 = String(valueFromAliases(raw, ["image3", "pic3", "photo3"])).trim();
+  const image1 = normalizeImagePath(valueFromAliases(raw, ["image", "imageurl", "pic", "photo", "url"]));
+  const image2 = normalizeImagePath(valueFromAliases(raw, ["image2", "pic2", "photo2"]));
+  const image3 = normalizeImagePath(valueFromAliases(raw, ["image3", "pic3", "photo3"]));
   const idRaw = valueFromAliases(raw, ["id", "sku", "productid"]);
   const priceRaw = valueFromAliases(raw, ["price", "sellingprice", "saleprice", "amount"]);
   const mrpRaw = valueFromAliases(raw, ["mrp", "originalprice", "listprice"]);
